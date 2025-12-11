@@ -2,7 +2,7 @@
 --Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
---Date        : Wed Nov 19 12:28:45 2025
+--Date        : Wed Nov 19 13:22:02 2025
 --Host        : Laptop_Adi running 64-bit major release  (build 9200)
 --Command     : generate_target design_citireSD.bd
 --Design      : design_citireSD
@@ -54,6 +54,9 @@ end design_citireSD;
 architecture STRUCTURE of design_citireSD is
   component design_citireSD_processing_system7_0_0 is
   port (
+    TTC0_WAVE0_OUT : out STD_LOGIC;
+    TTC0_WAVE1_OUT : out STD_LOGIC;
+    TTC0_WAVE2_OUT : out STD_LOGIC;
     USB0_PORT_INDCTL : out STD_LOGIC_VECTOR ( 1 downto 0 );
     USB0_VBUS_PWRSELECT : out STD_LOGIC;
     USB0_VBUS_PWRFAULT : in STD_LOGIC;
@@ -828,6 +831,9 @@ architecture STRUCTURE of design_citireSD is
   signal NLW_processing_system7_0_PS_CLK_UNCONNECTED : STD_LOGIC;
   signal NLW_processing_system7_0_PS_PORB_UNCONNECTED : STD_LOGIC;
   signal NLW_processing_system7_0_PS_SRSTB_UNCONNECTED : STD_LOGIC;
+  signal NLW_processing_system7_0_TTC0_WAVE0_OUT_UNCONNECTED : STD_LOGIC;
+  signal NLW_processing_system7_0_TTC0_WAVE1_OUT_UNCONNECTED : STD_LOGIC;
+  signal NLW_processing_system7_0_TTC0_WAVE2_OUT_UNCONNECTED : STD_LOGIC;
   signal NLW_processing_system7_0_USB0_VBUS_PWRSELECT_UNCONNECTED : STD_LOGIC;
   signal NLW_processing_system7_0_DDR_Addr_UNCONNECTED : STD_LOGIC_VECTOR ( 14 downto 0 );
   signal NLW_processing_system7_0_DDR_BankAddr_UNCONNECTED : STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -1401,6 +1407,9 @@ processing_system7_0: component design_citireSD_processing_system7_0_0
       PS_CLK => NLW_processing_system7_0_PS_CLK_UNCONNECTED,
       PS_PORB => NLW_processing_system7_0_PS_PORB_UNCONNECTED,
       PS_SRSTB => NLW_processing_system7_0_PS_SRSTB_UNCONNECTED,
+      TTC0_WAVE0_OUT => NLW_processing_system7_0_TTC0_WAVE0_OUT_UNCONNECTED,
+      TTC0_WAVE1_OUT => NLW_processing_system7_0_TTC0_WAVE1_OUT_UNCONNECTED,
+      TTC0_WAVE2_OUT => NLW_processing_system7_0_TTC0_WAVE2_OUT_UNCONNECTED,
       USB0_PORT_INDCTL(1 downto 0) => NLW_processing_system7_0_USB0_PORT_INDCTL_UNCONNECTED(1 downto 0),
       USB0_VBUS_PWRFAULT => '0',
       USB0_VBUS_PWRSELECT => NLW_processing_system7_0_USB0_VBUS_PWRSELECT_UNCONNECTED

@@ -1,0 +1,1 @@
+pune ip la jetson 192.168.1.20 netmask 24

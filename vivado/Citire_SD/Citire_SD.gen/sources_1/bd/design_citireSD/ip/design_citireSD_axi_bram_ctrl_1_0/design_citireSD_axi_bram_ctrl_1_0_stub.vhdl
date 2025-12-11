@@ -2,7 +2,7 @@
 -- Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
--- Date        : Wed Nov 19 12:30:03 2025
+-- Date        : Tue Nov 18 15:57:03 2025
 -- Host        : Laptop_Adi running 64-bit major release  (build 9200)
 -- Command     : write_vhdl -force -mode synth_stub -rename_top design_citireSD_axi_bram_ctrl_1_0 -prefix
 --               design_citireSD_axi_bram_ctrl_1_0_ design_citireSD_axi_bram_ctrl_0_0_stub.vhdl
