@@ -1,0 +1,3 @@
+C:/ssc/PROIECT/vitis/lwip_echo_server/build/CMakeFiles/lwip_echo_server.elf.dir
+C:/ssc/PROIECT/vitis/lwip_echo_server/build/CMakeFiles/edit_cache.dir
+C:/ssc/PROIECT/vitis/lwip_echo_server/build/CMakeFiles/rebuild_cache.dir

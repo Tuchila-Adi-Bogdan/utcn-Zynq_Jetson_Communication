@@ -1,0 +1,23 @@
+# ninja log v5
+41	156	7864661051918083	CMakeFiles/lwip_echo_server.elf.dir/platform_mb.c.obj	81ea481eaad18305
+24	150	7864661051888039	CMakeFiles/lwip_echo_server.elf.dir/i2c_access.c.obj	f3cc02dba1f28f36
+56	182	7864661052263176	CMakeFiles/lwip_echo_server.elf.dir/sfp.c.obj	fcc50f665cfc000a
+45	160	7864661051983158	CMakeFiles/lwip_echo_server.elf.dir/platform_zynq.c.obj	21c9ed39d4b12b9f
+50	169	7864661052103183	CMakeFiles/lwip_echo_server.elf.dir/platform_zynqmp.c.obj	faf8ff0329feded6
+378	564	7864661055698697	lwip_echo_server.elf	bef98d923e381ede
+61	176	7864661052183170	CMakeFiles/lwip_echo_server.elf.dir/si5324.c.obj	aac1621f97bb836d
+28	189	7864661052313170	CMakeFiles/lwip_echo_server.elf.dir/iic_phyreset.c.obj	f8db9bd888ceffeb
+20	271	7864661053153449	CMakeFiles/lwip_echo_server.elf.dir/echo.c.obj	b1e81d81d339c460
+32	287	7864661053323489	CMakeFiles/lwip_echo_server.elf.dir/main.c.obj	74f1e5cb007fa04a
+36	378	7864661054232720	CMakeFiles/lwip_echo_server.elf.dir/platform.c.obj	951019463a2cc173
+22	143	7864682164102431	CMakeFiles/lwip_echo_server.elf.dir/i2c_access.c.obj	f3cc02dba1f28f36
+37	144	7864682164092434	CMakeFiles/lwip_echo_server.elf.dir/platform_mb.c.obj	81ea481eaad18305
+46	148	7864682164132429	CMakeFiles/lwip_echo_server.elf.dir/platform_zynqmp.c.obj	faf8ff0329feded6
+42	151	7864682164122429	CMakeFiles/lwip_echo_server.elf.dir/platform_zynq.c.obj	21c9ed39d4b12b9f
+56	166	7864682164352433	CMakeFiles/lwip_echo_server.elf.dir/si5324.c.obj	aac1621f97bb836d
+51	170	7864682164382439	CMakeFiles/lwip_echo_server.elf.dir/sfp.c.obj	fcc50f665cfc000a
+25	184	7864682164552457	CMakeFiles/lwip_echo_server.elf.dir/iic_phyreset.c.obj	f8db9bd888ceffeb
+17	260	7864682165317760	CMakeFiles/lwip_echo_server.elf.dir/echo.c.obj	b1e81d81d339c460
+29	281	7864682165527740	CMakeFiles/lwip_echo_server.elf.dir/main.c.obj	74f1e5cb007fa04a
+33	345	7864682166162957	CMakeFiles/lwip_echo_server.elf.dir/platform.c.obj	951019463a2cc173
+345	539	7864682167655569	lwip_echo_server.elf	bef98d923e381ede
