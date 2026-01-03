@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <math.h>
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+cudaError_t matrixMultiplicationWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
-__global__ void addKernel(int *C, const int *A, const int *B, int N)
+__global__ void matrixMultiplicationKernel(int *C, const int *A, const int *B, int N)
 {
 	int ROW = blockIdx.y * blockDim.y + threadIdx.y;
 	int COL = blockIdx.x * blockDim.x + threadIdx.x;
@@ -31,15 +31,15 @@ int main()
     int c[arraySize] = { 0 };
 
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
+    cudaError_t cudaStatus = matrixMultiplicationWithCuda(c, a, b, arraySize);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
+        fprintf(stderr, "matrixMultiplicationWithCuda failed!");
         return 1;
     }
 
     for (int i = 0; i < arraySize; i++)
     {
-		printf("%d + %d = %d\n", a[i], b[i], c[i]);
+		printf("%d * %d = %d\n", a[i], b[i], c[i]);
     }
 
     // cudaDeviceReset must be called before exiting in order for profiling and
@@ -54,7 +54,7 @@ int main()
 }
 
 // Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+cudaError_t matrixMultiplicationWithCuda(int *c, const int *a, const int *b, unsigned int size)
 {
     int *dev_a = 0;
     int *dev_b = 0;
@@ -110,7 +110,7 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
         blocksPerGrid.x = ceil(double(N) / double(threadsPerBlock.x));
         blocksPerGrid.y = ceil(double(N) / double(threadsPerBlock.y));
     }
-    addKernel <<<blocksPerGrid, threadsPerBlock>>> (dev_c, dev_a, dev_b, N);
+    matrixMultiplicationKernel <<<blocksPerGrid, threadsPerBlock>>> (dev_c, dev_a, dev_b, N);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();

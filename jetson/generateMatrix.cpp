@@ -14,7 +14,7 @@ int main()
 {
 
     fout<<MATRIX_NO<<"\n";
-    fout<<MATRIX_SIZE*MATRIX_SIZE<<"\n";
+    fout<<MATRIX_SIZE<<"\n";
 
     for (int n = 0; n < MATRIX_NO; n++) 
     {
