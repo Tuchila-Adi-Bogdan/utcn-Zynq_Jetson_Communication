@@ -1,6 +1,0 @@
-.gitignore
-**.exe
-**.txt
-.vs
-CudaMatr.*
-x64
