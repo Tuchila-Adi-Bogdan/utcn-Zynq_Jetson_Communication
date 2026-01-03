@@ -1,0 +1,16 @@
+**.exe
+**.txt
+.cudaRunTime2
+.vscode
+.cudaTextProcessing
+text_processing
+CudaTextProcessing
+CudaRuntime2
+text_processing.cpp
+text_processing.cu
+generteArr.cpp
+CudaRuntimeTest
+.vs
+**.vcxproj
+**.vcxproj.user
+x64
