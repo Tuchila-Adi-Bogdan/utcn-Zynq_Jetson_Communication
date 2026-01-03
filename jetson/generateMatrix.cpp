@@ -3,10 +3,9 @@
 
 using namespace std;
 
-#define MATRIX_NO 100
-#define MATRIX_SIZE 2048
-#define MIN_VALUE 0
-#define MAX_VALUE 1024
+#define MATRIX_NO 20
+#define MATRIX_SIZE 500
+#define MAX_VALUE 10000
 
 ofstream fout("matrix.txt");
 
@@ -22,7 +21,7 @@ int main()
         {
             for (int j = 0; j < MATRIX_SIZE; j++) 
             {
-                int value = MIN_VALUE + rand() % (MAX_VALUE - MIN_VALUE + 1);
+                double value = (rand() % MAX_VALUE) / (MAX_VALUE * 1.0);
                 fout << value << " ";
             }
             fout << "\n";

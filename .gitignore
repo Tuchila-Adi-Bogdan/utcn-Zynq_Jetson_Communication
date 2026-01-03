@@ -16,3 +16,12 @@
 .vitisWorkspace.json
 
 New Text Document.txt
+.vs/
+.vscode/
+jetson/.gitignore
+.gitignore
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/.suo
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/Browse.VC.db
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/DocumentLayout.backup.json
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/DocumentLayout.json
+*.vcxproj

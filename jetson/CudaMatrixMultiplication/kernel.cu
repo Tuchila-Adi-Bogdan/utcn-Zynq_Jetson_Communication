@@ -7,16 +7,18 @@
 
 #include <fstream>
 
-cudaError_t matrixMultiplicationWithCuda(int* c, const int* a, const int* b, unsigned int size);
+#define FILEPATH "../matrix.txt"
 
-__global__ void matrixMultiplicationKernel(int *C, int *A, int *B, int N)
+cudaError_t matrixMultiplicationWithCuda(double* c, const double* a, const double* b, unsigned int size);
+
+__global__ void matrixMultiplicationKernel(double *C, double *A, double *B, int N)
 {
 	int ROW = blockIdx.y * blockDim.y + threadIdx.y;
 	int COL = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (ROW < N && COL < N) 
     {
-        float tmpSum = 0;
+        double tmpSum = 0.0f;
         // each thread computes one element of the block sub-matrix
         for (int i = 0; i < N; i++) {
             tmpSum += A[ROW * N + i] * B[i * N + COL];
@@ -25,13 +27,13 @@ __global__ void matrixMultiplicationKernel(int *C, int *A, int *B, int N)
     }
 }
 
-int* squareIdentity(int size)
+double* squareIdentity(int size)
 {
-    int* matrix = (int*)calloc(size * size, sizeof(int));
+    double* matrix = (double*)calloc(size * size, sizeof(double));
 
     for (int i = 0; i < size * size; i += (size + 1))
     {
-        matrix[i] = 1;
+        matrix[i] = 1.0f;
     }
 
     return matrix;
@@ -39,9 +41,9 @@ int* squareIdentity(int size)
 
 using namespace std;
 
-int* squareMatrixFromFile(ifstream& fin, int size)
+double* squareMatrixFromFile(ifstream& fin, int size)
 {
-    int* matrix = (int*)calloc(size * size, sizeof(int));
+    double* matrix = (double*)calloc(size * size, sizeof(double));
     for (int i = 0; i < size * size; i++)
     {
         fin >> matrix[i];
@@ -54,17 +56,17 @@ int main()
     int noOfMatrix = 0;
     int size = 0;
 
-    ifstream fin("../matrixshort.txt");
+    ifstream fin(FILEPATH);
 	fin >> noOfMatrix >> size;
 
-	int* a = squareIdentity(size);
-    int* b = nullptr;
-    int* c = nullptr;
+	double* a = squareIdentity(size);
+    double* b = nullptr;
+    double* c = nullptr;
 
     for (int index = 0; index < noOfMatrix; index++)
     {
 		b = squareMatrixFromFile(fin, size); //always multiply a by b read from file
-        c = (int*)malloc(size * size * sizeof(int));
+        c = (double*)malloc(size * size * sizeof(double));
 		cudaError_t cudaStatus = matrixMultiplicationWithCuda(c, a, b, size);
         if (cudaStatus != cudaSuccess) {
             fprintf(stderr, "matrixMultiplicationWithCuda failed!");
@@ -88,7 +90,7 @@ int main()
     printf("Final Result Matrix:\n");
     for (int i = 0; i < size * size; i++)
     {
-        printf("%d ", a[i]);
+        printf("%f ", a[i]);
         if ((i + 1) % size == 0) printf("\n");
     }
     free(a);
@@ -97,13 +99,13 @@ int main()
 }
 
 // Helper function for using CUDA to add vectors in parallel.
-cudaError_t matrixMultiplicationWithCuda(int *c, const int *a, const int *b, unsigned int size)
+cudaError_t matrixMultiplicationWithCuda(double *c, const double *a, const double *b, unsigned int size)
 {
-    int *dev_a = 0;
-    int *dev_b = 0;
-    int *dev_c = 0;
+    double *dev_a = 0;
+    double *dev_b = 0;
+    double *dev_c = 0;
     cudaError_t cudaStatus;
-    size_t matrixBytes = size * size * sizeof(int);
+    size_t matrixBytes = size * size * sizeof(double);
     // Choose which GPU to run on, change this on a multi-GPU system.
     cudaStatus = cudaSetDevice(0);
     if (cudaStatus != cudaSuccess) {
