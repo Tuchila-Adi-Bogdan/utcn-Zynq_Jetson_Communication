@@ -153,11 +153,11 @@ bool writeBMP(const char* filename, int width, int height, const unsigned char* 
     return true;
 }
 
-cudaError_t grayscaleFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const int width, unsigned int height);
+cudaError_t grayscaleFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const unsigned int width, const unsigned int height);
 
-cudaError_t negativeFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const int width, unsigned int height);
+cudaError_t negativeFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const unsigned int width, const unsigned int height);
 
-cudaError_t medianFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const int width, unsigned int height);
+cudaError_t addFactorFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const unsigned int width, const unsigned int height, const char factor);
 
 __global__ void grayscaleKernel(unsigned char* output, const unsigned char* input, int width, int height)
 {
@@ -210,13 +210,35 @@ __global__ void negativeKernel(unsigned char* output, const unsigned char* input
     }
 }
 
+__global__ void addFactorKernel(unsigned char* output, const unsigned char* input, int width, int height, char factor)
+{
+    //Calculate the 2D coordinates of this thread
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // Bounds check (ensure we stay inside the image)
+    if (x < width && y < height)
+    {
+
+        // Calculate the global 1D index for the start of this pixel
+        // multiplied by 3 because each pixel has 3 bytes (B, G, R)
+        int idx = (y * width + x) * 3;
+
+        output[idx] = min(input[idx]+factor, 255);
+        output[idx + 1] = min(input[idx + 1] + factor, 255);
+        output[idx + 2] = min(input[idx + 2] + factor, 255);
+    }
+}
+
 int main()
 {
 	int width, height;
 	unsigned char* imageData = readBMP(FILEPATH, width, height);
+    char factor = -45;
     cudaError_t cudaStatus;
     if (imageData) 
     {
+		//Grayscale Filter
         size_t imageSize = width * height * 3;
         unsigned char* resultImage = new unsigned char[imageSize];
         cudaStatus = grayscaleFilter(resultImage, imageData, width, height);
@@ -226,6 +248,7 @@ int main()
         }
 		writeBMP("outputGrayscale.bmp", width, height, resultImage);
 
+		///Negative Filter
         resultImage = new unsigned char[imageSize];
         cudaStatus = negativeFilter(resultImage, imageData, width, height);
         if (cudaStatus != cudaSuccess) {
@@ -233,6 +256,15 @@ int main()
             return 1;
         }
         writeBMP("outputNegative.bmp", width, height, resultImage);
+
+        ///Add Factor Filter
+        resultImage = new unsigned char[imageSize];
+        cudaStatus = addFactorFilter(resultImage, imageData, width, height, factor);
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "addFactorFilter failed!");
+            return 1;
+        }
+        writeBMP("outputAddFactor.bmp", width, height, resultImage);
 
         delete[] imageData;
 	}
@@ -246,7 +278,7 @@ int main()
 }
 
 
-cudaError_t grayscaleFilter(unsigned char *resultBMP, const unsigned char *inputBMP, const int width, unsigned int height)
+cudaError_t grayscaleFilter(unsigned char *resultBMP, const unsigned char *inputBMP, const unsigned int width, const unsigned int height)
 {
     unsigned char* d_input = nullptr;
     unsigned char* d_output = nullptr;
@@ -314,7 +346,7 @@ Error:
     return cudaStatus;
 }
 
-cudaError_t negativeFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const int width, unsigned int height)
+cudaError_t negativeFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const unsigned int width, const unsigned int height)
 {
     unsigned char* d_input = nullptr;
     unsigned char* d_output = nullptr;
@@ -352,6 +384,74 @@ cudaError_t negativeFilter(unsigned char* resultBMP, const unsigned char* inputB
     dim3 blocksPerGrid((width + threadsPerBlock.x - 1) / threadsPerBlock.x, (height + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
     negativeKernel<<<blocksPerGrid, threadsPerBlock>>>(d_output, d_input, width, height);
+
+    // Check for any errors launching the kernel
+    cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        goto Error;
+    }
+
+    // cudaDeviceSynchronize waits for the kernel to finish, and returns
+    // any errors encountered during the launch.
+    cudaStatus = cudaDeviceSynchronize();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        goto Error;
+    }
+
+    // Copy output vector from GPU buffer to host memory.
+    cudaStatus = cudaMemcpy(resultBMP, d_output, imageBytes, cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+        goto Error;
+    }
+
+Error:
+    cudaFree(d_input);
+    cudaFree(d_output);
+
+    return cudaStatus;
+}
+
+cudaError_t addFactorFilter(unsigned char* resultBMP, const unsigned char* inputBMP, const unsigned int width, const unsigned int height, const char factor)
+{
+    unsigned char* d_input = nullptr;
+    unsigned char* d_output = nullptr;
+    size_t imageBytes = width * height * 3 * sizeof(unsigned char);
+
+    cudaError_t cudaStatus;
+
+    // Choose which GPU to run on, change this on a multi-GPU system.
+    cudaStatus = cudaSetDevice(0);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+        goto Error;
+    }
+
+    cudaStatus = cudaMalloc((void**)&d_input, imageBytes);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+        goto Error;
+    }
+
+    cudaStatus = cudaMalloc((void**)&d_output, imageBytes);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+        goto Error;
+    }
+
+    // Copy input vectors from host memory to GPU buffers.
+    cudaStatus = cudaMemcpy(d_input, inputBMP, imageBytes, cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+        goto Error;
+    }
+
+    dim3 threadsPerBlock(16, 16);
+    dim3 blocksPerGrid((width + threadsPerBlock.x - 1) / threadsPerBlock.x, (height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+
+    addFactorKernel<<<blocksPerGrid, threadsPerBlock>>>(d_output, d_input, width, height, factor);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();
