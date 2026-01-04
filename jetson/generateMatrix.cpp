@@ -4,7 +4,7 @@
 using namespace std;
 
 #define MATRIX_NO 20
-#define MATRIX_SIZE 500
+#define MATRIX_SIZE 25
 #define MAX_VALUE 10000
 
 ofstream fout("matrix.txt");
