@@ -238,8 +238,9 @@ int main()
     cudaError_t cudaStatus;
     if (imageData) 
     {
-		//Grayscale Filter
         size_t imageSize = width * height * 3;
+
+		//Grayscale Filter
         unsigned char* resultImage = new unsigned char[imageSize];
         cudaStatus = grayscaleFilter(resultImage, imageData, width, height);
         if (cudaStatus != cudaSuccess) {

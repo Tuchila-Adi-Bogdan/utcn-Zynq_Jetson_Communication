@@ -9,20 +9,15 @@ def compile_and_run(source_file):
         print(f"Error: Source file '{source_file}' not found.")
         return
 
-    # source_file = "CudaMatrix/kernel.cu"
-    # source_dir = "CudaMatrix"
     source_dir = os.path.dirname(source_file)
     file_name_no_ext = os.path.splitext(os.path.basename(source_file))[0]
     
-    # 1. Define where to put the executable (inside the subfolder)
-    # Windows: CudaMatrix\kernel.exe
     output_exe_path = os.path.join(source_dir, file_name_no_ext) 
     if platform.system() == "Windows":
         output_exe_path += ".exe"
 
     print(f"--- Compiling {source_file} ---")
-    
-    # Compile directly to the subfolder
+
     compile_cmd = ["nvcc", source_file, "-o", output_exe_path, "-w"]
     
     try:
@@ -38,21 +33,13 @@ def compile_and_run(source_file):
     print(f"\n--- Running {output_exe_path} ---")
     
     try:
-        # 2. RUN logic
-        # We DO NOT use cwd=source_dir. We stay in the root folder.
-        # We just tell subprocess to run the exe found in the subfolder.
-        
-        # Windows requires standard backslashes for path execution sometimes
         run_cmd = os.path.abspath(output_exe_path)
-        
-        # Run it! 
-        # Since we didn't change cwd, it looks for matrix.txt in the same folder as this script.
-        subprocess.run([run_cmd], check=True)
+        subprocess.run([run_cmd])
         
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Execution failed (Code {e.returncode})")
+        print(f"\nExecution failed (Code {e.returncode})")
     except OSError as e:
-        print(f"\n❌ System Error: {e}")
+        print(f"\nSystem Error: {e}")
 
 def delete_file(filepath):
     try:
@@ -83,7 +70,6 @@ if __name__ == "__main__":
             confirm = input("Are you sure you want to delete matrix.txt, input.bmp, output.bmp (y/n): ")
             if confirm.lower() == 'y':
                 print("Cleaning up...")
-                # Add specific files you want to delete here
                 delete_file("matrix.txt")
                 delete_file("matrixshort.txt")
                 delete_file("input.bmp")
