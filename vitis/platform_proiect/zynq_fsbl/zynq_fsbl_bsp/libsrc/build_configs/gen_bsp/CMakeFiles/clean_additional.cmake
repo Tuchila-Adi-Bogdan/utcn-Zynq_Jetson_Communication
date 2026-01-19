@@ -6,14 +6,8 @@ if("${CONFIG}" STREQUAL "" OR "${CONFIG}" STREQUAL "")
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\diskio.h"
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\ff.h"
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\ffconf.h"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\sleep.h"
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\xilffs.h"
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\xilffs_config.h"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\xilrsa.h"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\xiltimer.h"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\include\\xtimer_config.h"
   "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\lib\\libxilffs.a"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\lib\\libxilrsa.a"
-  "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\zynq_fsbl\\zynq_fsbl_bsp\\lib\\libxiltimer.a"
   )
 endif()

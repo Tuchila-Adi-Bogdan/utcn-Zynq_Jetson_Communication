@@ -1,7 +1,7 @@
 sdt: hw_artifacts\ps7_cortexa9_0_baremetal.dts
 family: Zynq
 path: C:\ssc\PROIECT\vitis\platform_proiect\zynq_fsbl\zynq_fsbl_bsp
-config: None
+config: reconfig
 os: standalone
 os_info:
   standalone:
@@ -396,7 +396,7 @@ lib_config:
       name: XILFFS_use_lfn
       permission: read_write
       type: integer
-      value: '0'
+      value: '1'
       default: '0'
       options:
       - '0'
