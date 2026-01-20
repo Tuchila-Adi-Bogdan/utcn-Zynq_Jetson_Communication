@@ -1,0 +1,13 @@
+vhdl xil_defaultlib  \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_bram_ctrl_0_0/sim/design_citireSD_axi_bram_ctrl_0_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_bram_ctrl_1_0/sim/design_citireSD_axi_bram_ctrl_1_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_bram_ctrl_2_0/sim/design_citireSD_axi_bram_ctrl_2_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_bram_ctrl_3_0/sim/design_citireSD_axi_bram_ctrl_3_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_gpio_0_0/sim/design_citireSD_axi_gpio_0_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_gpio_1_0/sim/design_citireSD_axi_gpio_1_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_axi_smc_0/bd_0/ip/ip_1/sim/bd_c60d_psr_aclk_0.vhd" \
+"../../../bd/design_citireSD/ip/design_citireSD_rst_ps7_0_50M_0/sim/design_citireSD_rst_ps7_0_50M_0.vhd" \
+"../../../bd/design_citireSD/sim/design_citireSD.vhd" \
+
+# Do not sort compile order
+nosort

@@ -28,18 +28,6 @@ jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/DocumentLayout.
 
 # Vivado gitignore
 
-# root
-/*
-!.gitignore
-!README.md
-!LICENSE
-!project_info.tcl
-!proj/
-!repo/
-!src/
-!scripts/
-!hw_handoff/
-
 # vivado workspace
 proj/*
 
