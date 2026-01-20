@@ -1,7 +1,7 @@
 {
   "name": "lwip_echo_server",
   "type": "HOST",
-  "platform": "C:\\ssc\\PROIECT\\vitis\\platform_proiect\\export\\platform_proiect\\platform_proiect.xpfm",
+  "platform": "C:\\ssc\\PROIECT\\vitis\\platform\\export\\platform\\platform.xpfm",
   "domain": "standalone_ps7_cortexa9_0",
   "cpuInstance": "ps7_cortexa9_0",
   "cpuType": "cortex-a9",

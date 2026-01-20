@@ -3,15 +3,36 @@
  * Copyright (C) 2022 - 2024 Advanced Micro Devices, Inc.
  * All rights reserved.
  *
- * Modified for UDP File Transfer from SD Card
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ *
  */
 
 #include <stdio.h>
 #include <string.h>
-#include <sleep.h> // For usleep
-
 #include "xparameters.h"
+
 #include "netif/xadapter.h"
+
 #include "platform.h"
 #include "platform_config.h"
 #if defined (__arm__) || defined(__aarch64__)
@@ -20,11 +41,10 @@
 
 #include "lwip/tcp.h"
 #include "xil_cache.h"
-#include "lwip/udp.h"
-
-// SD Card Includes
-#include "xsdps.h"
-#include "ff.h"
+#include "lwip/udp.h"    
+#include "xsdps.h"        
+#include "ff.h"           
+#include "sleep.h"        
 
 #if LWIP_IPV6==1
 #include "lwip/ip.h"
@@ -34,12 +54,10 @@
 #endif
 #endif
 
-/* -- USER SETTINGS -- */
-#define PC_IP_ADDR "192.168.1.20" // IP of your PC running the listener
+#define PC_IP_ADDR "192.168.1.20" // IP of your PC
 #define PC_UDP_PORT 5005           // Port on your PC
-#define CHUNK_SIZE 1024            // Bytes per packet (Must be < MTU 1500)
+#define CHUNK_SIZE 1024            // Bytes per packet
 
-/* -- GLOBAL VARIABLES -- */
 FATFS fatfs;
 FIL file;
 FRESULT result;
@@ -50,6 +68,8 @@ int start_application();
 int transfer_data();
 void tcp_fasttmr(void);
 void tcp_slowtmr(void);
+
+/* missing declaration in lwIP */
 void lwip_init();
 
 #if LWIP_IPV6==0
@@ -64,56 +84,70 @@ extern volatile int TcpSlowTmrFlag;
 static struct netif server_netif;
 struct netif *echo_netif;
 
-/* -- HELPER FUNCTIONS -- */
-
 #if LWIP_IPV6==1
-void print_ip6(char *msg, ip_addr_t *ip) {
-    print(msg);
-    xil_printf(" %x:%x:%x:%x:%x:%x:%x:%x\n\r",
-           IP6_ADDR_BLOCK1(&ip->u_addr.ip6), IP6_ADDR_BLOCK2(&ip->u_addr.ip6),
-           IP6_ADDR_BLOCK3(&ip->u_addr.ip6), IP6_ADDR_BLOCK4(&ip->u_addr.ip6),
-           IP6_ADDR_BLOCK5(&ip->u_addr.ip6), IP6_ADDR_BLOCK6(&ip->u_addr.ip6),
-           IP6_ADDR_BLOCK7(&ip->u_addr.ip6), IP6_ADDR_BLOCK8(&ip->u_addr.ip6));
+void print_ip6(char *msg, ip_addr_t *ip)
+{
+	print(msg);
+	xil_printf(" %x:%x:%x:%x:%x:%x:%x:%x\n\r",
+		   IP6_ADDR_BLOCK1(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK2(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK3(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK4(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK5(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK6(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK7(&ip->u_addr.ip6),
+		   IP6_ADDR_BLOCK8(&ip->u_addr.ip6));
+
 }
 #else
-void print_ip(char *msg, ip_addr_t *ip) {
-    print(msg);
-    xil_printf("%d.%d.%d.%d\n\r", ip4_addr1(ip), ip4_addr2(ip),
-           ip4_addr3(ip), ip4_addr4(ip));
+void print_ip(char *msg, ip_addr_t *ip)
+{
+	print(msg);
+	xil_printf("%d.%d.%d.%d\n\r", ip4_addr1(ip), ip4_addr2(ip),
+		   ip4_addr3(ip), ip4_addr4(ip));
 }
 
-void print_ip_settings(ip_addr_t *ip, ip_addr_t *mask, ip_addr_t *gw) {
-    print_ip("Board IP: ", ip);
-    print_ip("Netmask : ", mask);
-    print_ip("Gateway : ", gw);
+void print_ip_settings(ip_addr_t *ip, ip_addr_t *mask, ip_addr_t *gw)
+{
+
+	print_ip("Board IP: ", ip);
+	print_ip("Netmask : ", mask);
+	print_ip("Gateway : ", gw);
 }
 #endif
 
-/* * Function: send_file_to_pc
- * -------------------------
- * Reads a file from SD card in chunks and sends via UDP.
- */
+#if defined (__arm__) && !defined (ARMR5)
+#if XPAR_GIGE_PCS_PMA_SGMII_CORE_PRESENT == 1 || XPAR_GIGE_PCS_PMA_1000BASEX_CORE_PRESENT == 1
+int ProgramSi5324(void);
+int ProgramSfpPhy(void);
+#endif
+#endif
+
+#ifdef XPS_BOARD_ZCU102
+#if defined (XPAR_XIICPS_0_DEVICE_ID) || defined (XPAR_XIICPS_0_BASEADDR)
+int IicPhyReset(void);
+#endif
+#endif
+
 void send_file_to_pc(char *filename, struct udp_pcb *pcb) {
     ip_addr_t pc_ip;
     struct pbuf *p;
     UINT bytesRead;
-    static uint8_t buffer[CHUNK_SIZE]; // Static to save stack space
+    static uint8_t buffer[CHUNK_SIZE]; 
     
-    // Set destination IP
+    // Set PC IP Address
     ipaddr_aton(PC_IP_ADDR, &pc_ip);
 
-    xil_printf("\r\n[INFO] Opening file: %s\r\n", filename);
+    xil_printf("Opening file: %s\r\n", filename);
 
     // Open file
     result = f_open(&file, filename, FA_READ);
     if (result != FR_OK) {
-        xil_printf("[ERROR] Failed to open %s. Error code: %d\r\n", filename, result);
+        xil_printf("ERROR: Failed to open %s. Code: %d\r\n", filename, result);
         return;
     }
 
-    uint32_t total_sent = 0;
-    
-    // Send a "START:filename" packet so PC knows what's coming (Optional protocol)
+    // 1. Send START packet
     char start_msg[64];
     snprintf(start_msg, sizeof(start_msg), "START:%s", filename);
     p = pbuf_alloc(PBUF_TRANSPORT, strlen(start_msg), PBUF_RAM);
@@ -122,49 +156,31 @@ void send_file_to_pc(char *filename, struct udp_pcb *pcb) {
         udp_sendto(pcb, p, &pc_ip, PC_UDP_PORT);
         pbuf_free(p);
     }
-    usleep(10000); // Wait a bit after header
+    usleep(20000); // 20ms delay to let PC process header
 
-    // Read and Send Loop
+    // 2. Read and Send Loop
     while (1) {
-        // Read a chunk from SD
         result = f_read(&file, buffer, CHUNK_SIZE, &bytesRead);
-        
-        if (result != FR_OK || bytesRead == 0) {
-            break; // EOF or Error
-        }
+        if (result != FR_OK || bytesRead == 0) break; 
 
-        // Allocate LwIP buffer
         p = pbuf_alloc(PBUF_TRANSPORT, bytesRead, PBUF_RAM);
         if (!p) {
-            xil_printf("[ERROR] Out of memory for pbuf. Retrying...\r\n");
-            f_lseek(&file, f_tell(&file) - bytesRead); // Rewind file pointer to retry
+            xil_printf("Mem error, retrying...\r\n");
+            f_lseek(&file, f_tell(&file) - bytesRead); 
             usleep(10000);
             continue;
         }
 
-        // Copy data to pbuf
         memcpy(p->payload, buffer, bytesRead);
-
-        // Send UDP
-        err_t err = udp_sendto(pcb, p, &pc_ip, PC_UDP_PORT);
-        if (err != ERR_OK) {
-            xil_printf("[ERROR] udp_sendto failed: %d\r\n", err);
-        }
-
+        udp_sendto(pcb, p, &pc_ip, PC_UDP_PORT);
         pbuf_free(p);
-        total_sent += bytesRead;
-
-        // CRITICAL: UDP has no flow control. We must delay slightly 
-        // to allow the Ethernet MAC to drain the queue, otherwise we 
-        // will drop packets.
-        usleep(1000); // 1ms delay
+        
+        // Critical delay to prevent buffer overflow
+        usleep(1000); 
     }
 
-    // Close file
+    // 3. Send END packet
     f_close(&file);
-    xil_printf("[INFO] Finished sending %s. Total bytes: %u\r\n", filename, total_sent);
-
-    // Send END packet
     char end_msg[] = "END";
     p = pbuf_alloc(PBUF_TRANSPORT, sizeof(end_msg), PBUF_RAM);
     if(p){
@@ -172,129 +188,155 @@ void send_file_to_pc(char *filename, struct udp_pcb *pcb) {
         udp_sendto(pcb, p, &pc_ip, PC_UDP_PORT);
         pbuf_free(p);
     }
+    xil_printf("Sent %s\r\n", filename);
 }
 
-
-/* -- MAIN FUNCTION -- */
 int main()
 {
 #if LWIP_IPV6==0
-    ip_addr_t ipaddr, netmask, gw;
+	ip_addr_t ipaddr, netmask, gw;
+
 #endif
-    unsigned char mac_ethernet_address[] =
-    { 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 };
+	/* the mac address of the board. this should be unique per board */
+	unsigned char mac_ethernet_address[] =
+	{ 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 };
 
-    echo_netif = &server_netif;
+	echo_netif = &server_netif;
+#if defined (__arm__) && !defined (ARMR5)
+#if XPAR_GIGE_PCS_PMA_SGMII_CORE_PRESENT == 1 || XPAR_GIGE_PCS_PMA_1000BASEX_CORE_PRESENT == 1
+	ProgramSi5324();
+	ProgramSfpPhy();
+#endif
+#endif
 
-    init_platform();
+	/* Define this board specific macro in order perform PHY reset on ZCU102 */
+#ifdef XPS_BOARD_ZCU102
+	if (IicPhyReset()) {
+		xil_printf("Error performing PHY reset \n\r");
+		return -1;
+	}
+#endif
 
-    /* 1. INITIALIZE SD CARD */
-    xil_printf("\r\n--- Mount SD Card ---\r\n");
+	init_platform();
+
+    xil_printf("Mounting SD Card...\r\n");
     result = f_mount(&fatfs, "0:/", 1);
     if (result != FR_OK) {
-        xil_printf("[ERROR] Failed to mount SD card. Error: %d\r\n", result);
-        // We continue, but file operations will fail
+        xil_printf("SD Mount Failed: %d\r\n", result);
     } else {
-        xil_printf("[SUCCESS] SD Card Mounted.\r\n");
+        xil_printf("SD Mounted Successfully.\r\n");
     }
 
-    /* 2. INITIALIZE LWIP */
 #if LWIP_IPV6==0
 #if LWIP_DHCP==1
-    ipaddr.addr = 0; gw.addr = 0; netmask.addr = 0;
+	ipaddr.addr = 0;
+	gw.addr = 0;
+	netmask.addr = 0;
 #else
-    IP4_ADDR(&ipaddr,  192, 168,   1, 10);
-    IP4_ADDR(&netmask, 255, 255, 255,  0);
-    IP4_ADDR(&gw,      192, 168,   1,  1);
+	/* initialize IP addresses to be used */
+	IP4_ADDR(&ipaddr,  192, 168,   1, 10);
+	IP4_ADDR(&netmask, 255, 255, 255,  0);
+	IP4_ADDR(&gw,      192, 168,   1,  1);
 #endif
 #endif
+	print_app_header();
 
-    print_app_header();
-    lwip_init();
+	lwip_init();
 
 #if (LWIP_IPV6 == 0)
-    if (!xemac_add(echo_netif, &ipaddr, &netmask,
-               &gw, mac_ethernet_address,
-               PLATFORM_EMAC_BASEADDR)) {
-        xil_printf("Error adding N/W interface\n\r");
-        return -1;
-    }
+	/* Add network interface to the netif_list, and set it as default */
+	if (!xemac_add(echo_netif, &ipaddr, &netmask,
+		       &gw, mac_ethernet_address,
+		       PLATFORM_EMAC_BASEADDR)) {
+		xil_printf("Error adding N/W interface\n\r");
+		return -1;
+	}
 #else
-    if (!xemac_add(echo_netif, NULL, NULL, NULL, mac_ethernet_address,
-               PLATFORM_EMAC_BASEADDR)) {
-        xil_printf("Error adding N/W interface\n\r");
-        return -1;
-    }
-    echo_netif->ip6_autoconfig_enabled = 1;
-    netif_create_ip6_linklocal_address(echo_netif, 1);
-    netif_ip6_addr_set_state(echo_netif, 0, IP6_ADDR_VALID);
+	/* Add network interface to the netif_list, and set it as default */
+	if (!xemac_add(echo_netif, NULL, NULL, NULL, mac_ethernet_address,
+		       PLATFORM_EMAC_BASEADDR)) {
+		xil_printf("Error adding N/W interface\n\r");
+		return -1;
+	}
+	echo_netif->ip6_autoconfig_enabled = 1;
+
+	netif_create_ip6_linklocal_address(echo_netif, 1);
+	netif_ip6_addr_set_state(echo_netif, 0, IP6_ADDR_VALID);
+
+	print_ip6("\n\rBoard IPv6 address ", &echo_netif->ip6_addr[0].u_addr.ip6);
+
 #endif
-    netif_set_default(echo_netif);
-    platform_enable_interrupts();
-    netif_set_up(echo_netif);
+	netif_set_default(echo_netif);
+
+#ifndef SDT
+	/* now enable interrupts */
+	platform_enable_interrupts();
+#endif
+
+	/* specify that the network if is up */
+	netif_set_up(echo_netif);
 
 #if (LWIP_IPV6 == 0)
 #if (LWIP_DHCP==1)
-    dhcp_start(echo_netif);
-    dhcp_timoutcntr = 240;
-    while (((echo_netif->ip_addr.addr) == 0) && (dhcp_timoutcntr > 0)) {
-        xemacif_input(echo_netif);
-    }
-    if (dhcp_timoutcntr <= 0) {
-        if ((echo_netif->ip_addr.addr) == 0) {
-            IP4_ADDR(&(echo_netif->ip_addr),  192, 168,   1, 10);
-            IP4_ADDR(&(echo_netif->netmask), 255, 255, 255,  0);
-            IP4_ADDR(&(echo_netif->gw),      192, 168,   1,  1);
-        }
-    }
-    ipaddr.addr = echo_netif->ip_addr.addr;
-    gw.addr = echo_netif->gw.addr;
-    netmask.addr = echo_netif->netmask.addr;
-#endif
-    print_ip_settings(&ipaddr, &netmask, &gw);
+	/* Create a new DHCP client for this interface.
+	 * Note: you must call dhcp_fine_tmr() and dhcp_coarse_tmr() at
+	 * the predefined regular intervals after starting the client.
+	 */
+	dhcp_start(echo_netif);
+	dhcp_timoutcntr = 240;
+
+	while (((echo_netif->ip_addr.addr) == 0) && (dhcp_timoutcntr > 0)) {
+		xemacif_input(echo_netif);
+	}
+
+	if (dhcp_timoutcntr <= 0) {
+		if ((echo_netif->ip_addr.addr) == 0) {
+			xil_printf("DHCP Timeout\r\n");
+			xil_printf("Configuring default IP of 192.168.1.10\r\n");
+			IP4_ADDR(&(echo_netif->ip_addr),  192, 168,   1, 10);
+			IP4_ADDR(&(echo_netif->netmask), 255, 255, 255,  0);
+			IP4_ADDR(&(echo_netif->gw),      192, 168,   1,  1);
+		}
+	}
+
+	ipaddr.addr = echo_netif->ip_addr.addr;
+	gw.addr = echo_netif->gw.addr;
+	netmask.addr = echo_netif->netmask.addr;
 #endif
 
-    start_application();
+	print_ip_settings(&ipaddr, &netmask, &gw);
 
-    /* 3. CREATE UDP CONNECTION */
+#endif
+	/* start the application (web server, rxtest, txtest, etc..) */
+	start_application();
+
     struct udp_pcb *pcb = udp_new();
-    if (!pcb) {
-        xil_printf("Error creating UDP PCB\r\n");
-    }
-
-    /* 4. EXECUTE FILE TRANSFERS */
-    // Note: We do this inside the main loop's setup phase so it runs once after network is up.
-    // Ensure the PC side is listening before the board boots or reset the board after starting PC script.
-    
-    xil_printf("Waiting 2 seconds for network stabilization...\r\n");
-    sleep(2); 
-
     if (pcb) {
-        // Transfer Matrix
-        send_file_to_pc("matrix.txt", pcb);
-        
-        sleep(1); // Small pause between files
+        xil_printf("Network Up. Waiting 2s for link stabilization...\r\n");
+        sleep(2); 
 
-        // Transfer Image
+        // Send the files
+        send_file_to_pc("matrix.txt", pcb);
+        sleep(1);
         send_file_to_pc("image.bmp", pcb);
     }
 
-    /* 5. MAIN LOOP */
-    while (1) {
-        if (TcpFastTmrFlag) {
-            tcp_fasttmr();
-            TcpFastTmrFlag = 0;
-        }
-        if (TcpSlowTmrFlag) {
-            tcp_slowtmr();
-            TcpSlowTmrFlag = 0;
-        }
-        xemacif_input(echo_netif);
-        
-        // Optional: Keep sending a heartbeat to know the board is alive
-        // send_data_to_pc(pcb); 
-    }
+	/* receive and process packets */
+	while (1) {
+		if (TcpFastTmrFlag) {
+			tcp_fasttmr();
+			TcpFastTmrFlag = 0;
+		}
+		if (TcpSlowTmrFlag) {
+			tcp_slowtmr();
+			TcpSlowTmrFlag = 0;
+		}
+		xemacif_input(echo_netif);
+		transfer_data();
+	}
 
-    cleanup_platform();
-    return 0;
+	/* never reached */
+	cleanup_platform();
+
+	return 0;
 }
