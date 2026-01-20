@@ -1,0 +1,94 @@
+/build
+/export
+
+.o
+.d
+
+/logs
+.log
+
+.lock
+
+.bin
+.pdi
+.peers.ini
+.repo.yaml
+.vitisWorkspace.json
+
+New Text Document.txt
+.vs/
+.vscode/
+jetson/.gitignore
+.gitignore
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/.suo
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/Browse.VC.db
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/DocumentLayout.backup.json
+jetson/CudaMatrixMultiplication/.vs/CudaMatrixMultiplication/v17/DocumentLayout.json
+/jetson/CudaImageProcessing/main.c
+
+# Vivado gitignore
+
+# root
+/*
+!.gitignore
+!README.md
+!LICENSE
+!project_info.tcl
+!proj/
+!repo/
+!src/
+!scripts/
+!hw_handoff/
+
+# vivado workspace
+proj/*
+
+# ip repository
+repo/**
+!repo/vivado-library
+repo/vivado-library/**
+!repo/local
+!repo/local/**
+!repo/cache
+repo/cache/**
+
+# version controlled sources
+src/**
+!src/bd
+src/bd/**
+!src/bd/*.tcl
+!src/constraints
+src/constraints/**
+!src/constraints/*.xdc
+!src/hdl
+src/hdl/**
+!src/hdl/*.v
+!src/hdl/*.sv
+!src/hdl/*.vhd
+!src/ip
+!src/ip/*
+src/ip/*/**
+!src/ip/**/*.xci
+!src/other
+!src/other/**
+
+# hardware handoff
+hw_handoff/*
+!hw_handoff/*.xsa
+
+# maintain required directories
+!**/.keep
+
+# Vitis gitignore
+
+# ignore everything in workspace sub-dir
+/ws/*
+
+# except the cleanup scripts
+!/ws/cleanup.cmd
+!/ws/cleanup.sh
+
+# ignore Packages/ and wsdata/ created by Vitis
+/Packages
+/.wsdata
+dfx_runtime.txt
